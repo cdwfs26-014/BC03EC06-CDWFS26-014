@@ -1,0 +1,79 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1436.vfa_244484591f">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2214.vb_b_34b_2ea_9b_83"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2214.vb_b_34b_2ea_9b_83">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description>Pipeline CI/CD – Projet Water (tests, build, push, deploy)</description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.csd.CpsFlowDefinition" plugin="workflow-csd@3990.vd281b_845cf92">
+    <script>
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY   = &apos;localhost:5000&apos;
+        IMAGE_NAME = &apos;water-app&apos;
+    }
+
+    stages {
+
+        stage(&apos;Checkout&apos;) {
+            steps {
+                git url: &apos;https://github.com/turban-sizzle/fluffy-octo-sniffle.git&apos;,
+                    branch: &apos;main&apos;
+            }
+        }
+
+        stage(&apos;Tests&apos;) {
+            agent {
+                docker {
+                    image &apos;python:3.11&apos;
+                    reuseNode true
+                }
+            }
+            steps {
+                sh &apos;pip install -r requirements.txt&apos;
+                sh &apos;pytest&apos;
+            }
+        }
+
+        stage(&apos;Build Image&apos;) {
+            steps {
+                sh &quot;docker build -t ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} .&quot;
+                sh &quot;docker tag  ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY}/${IMAGE_NAME}:latest&quot;
+            }
+        }
+
+        stage(&apos;Push to Registry&apos;) {
+            steps {
+                sh &quot;docker push ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}&quot;
+                sh &quot;docker push ${REGISTRY}/${IMAGE_NAME}:latest&quot;
+            }
+        }
+
+        stage(&apos;Deploy&apos;) {
+            agent {
+                label &apos;ssh-agent&apos;
+            }
+            steps {
+                sh &quot;docker pull ${REGISTRY}/${IMAGE_NAME}:latest&quot;
+                sh &apos;docker stop water-app || true&apos;
+                sh &apos;docker rm   water-app || true&apos;
+                sh &quot;docker run -d --name water-app -p 5000:5000 ${REGISTRY}/${IMAGE_NAME}:latest&quot;
+            }
+        }
+    }
+}
+    </script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>

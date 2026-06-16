@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/turban-sizzle/fluffy-octo-sniffle.git',
+                    branch: 'main'
+            }
+        }
+
+        stage('Tests') {
+            agent {
+                docker {
+                    image 'python:3.11'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh 'pip install -r requirements.txt'
+                sh 'pytest'
+            }
+        }
+    }
+}
