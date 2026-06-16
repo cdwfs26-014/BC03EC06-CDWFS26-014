@@ -41,5 +41,17 @@ pipeline {
                 sh "docker push ${REGISTRY}/${IMAGE_NAME}:latest"
             }
         }
+
+        stage('Deploy') {
+            agent {
+                label 'ssh-agent'
+            }
+            steps {
+                sh "docker pull ${REGISTRY}/${IMAGE_NAME}:latest"
+                sh 'docker stop water-app || true'
+                sh 'docker rm   water-app || true'
+                sh "docker run -d --name water-app -p 5000:5000 ${REGISTRY}/${IMAGE_NAME}:latest"
+            }
+        }
     }
 }
