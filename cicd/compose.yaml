@@ -40,6 +40,28 @@ services:
     networks:
       - jenkins-net
 
+  jenkins-cli:
+    image: jenkins/jenkins:lts-jdk21
+    user: root
+    entrypoint: []
+    command: >
+      sh -c "
+        until curl -sf http://jenkins:8080/login > /dev/null; do
+          echo 'Waiting for Jenkins...' && sleep 5
+        done &&
+        curl -s http://jenkins:8080/jnlpJars/jenkins-cli.jar -o /tmp/jenkins-cli.jar &&
+        java -jar /tmp/jenkins-cli.jar -s http://jenkins:8080 -auth admin:admin create-node agent1 < /tmp/agent1.xml &&
+        java -jar /tmp/jenkins-cli.jar -s http://jenkins:8080 -auth admin:admin create-node agent2 < /tmp/agent2.xml
+      "
+    volumes:
+      - ./nodes/agent1.xml:/tmp/agent1.xml:ro
+      - ./nodes/agent2.xml:/tmp/agent2.xml:ro
+    depends_on:
+      - jenkins
+    restart: "no"
+    networks:
+      - jenkins-net
+
 networks:
   jenkins-net:
 

@@ -1,0 +1,19 @@
+<slave>
+  <name>agent1</name>
+  <description>Agent Jenkins JNLP 1</description>
+  <remoteFS>/home/jenkins/agent</remoteFS>
+  <numExecutors>1</numExecutors>
+  <mode>NORMAL</mode>
+  <retentionStrategy class="hudson.slaves.RetentionStrategy$Always"/>
+  <launcher class="hudson.slaves.JNLPLauncher">
+    <workDirSettings>
+      <disabled>false</disabled>
+      <workDirPath></workDirPath>
+      <internalDir>remoting</internalDir>
+      <failIfWorkDirIsMissing>false</failIfWorkDirIsMissing>
+    </workDirSettings>
+    <webSocket>true</webSocket>
+  </launcher>
+  <label>linux docker</label>
+  <nodeProperties/>
+</slave>
