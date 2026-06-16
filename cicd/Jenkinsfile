@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        REGISTRY   = 'localhost:5000'
+        IMAGE_NAME = 'water-app'
+    }
 
     stages {
 
@@ -21,6 +25,13 @@ pipeline {
             steps {
                 sh 'pip install -r requirements.txt'
                 sh 'pytest'
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                sh "docker build -t ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} ."
+                sh "docker tag  ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY}/${IMAGE_NAME}:latest"
             }
         }
     }
