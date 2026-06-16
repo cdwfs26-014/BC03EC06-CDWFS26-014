@@ -34,5 +34,12 @@ pipeline {
                 sh "docker tag  ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} ${REGISTRY}/${IMAGE_NAME}:latest"
             }
         }
+
+        stage('Push to Registry') {
+            steps {
+                sh "docker push ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}"
+                sh "docker push ${REGISTRY}/${IMAGE_NAME}:latest"
+            }
+        }
     }
 }

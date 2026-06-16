@@ -1,5 +1,6 @@
 services:
 
+  # ── Jenkins Master ── Etape 1 ────────────────────────────────────────────
   jenkins:
     build:
       context: ./jenkins
@@ -12,6 +13,7 @@ services:
     networks:
       - jenkins-net
 
+  # ── Agents JNLP ── Etape 2 ───────────────────────────────────────────────
   agent1:
     image: jenkins/agent:latest
     environment:
@@ -40,6 +42,7 @@ services:
     networks:
       - jenkins-net
 
+  # ── Jenkins CLI (service temporaire) ── Etape 3 ──────────────────────────
   jenkins-cli:
     image: jenkins/jenkins:lts-jdk21
     user: root
@@ -62,6 +65,7 @@ services:
     networks:
       - jenkins-net
 
+  # ── Agent SSH ── Etape 4 ──────────────────────────────────────────────────
   ssh-agent:
     image: jenkins/ssh-agent:latest
     environment:
@@ -73,8 +77,20 @@ services:
     networks:
       - jenkins-net
 
+  # ── Registre Docker local ── Etape 7 ─────────────────────────────────────
+  registry:
+    image: registry:3
+    container_name: registry
+    ports:
+      - "5000:5000"
+    volumes:
+      - registry_data:/var/lib/registry
+    networks:
+      - jenkins-net
+
 networks:
   jenkins-net:
 
 volumes:
   jenkins_home:
+  registry_data:
