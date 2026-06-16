@@ -111,3 +111,14 @@ ENV POSTGRES_PASSWORD=mypassword
 
 ---
 
+## Étape 9 – Rundeck
+
+Rundeck est une plateforme d'automatisation de runbooks permettant de planifier et d'exécuter des jobs sur des nœuds distants, avec contrôle d'accès, historique d'audit et notifications.
+
+### Étape associée n°1 : Déploiement (Étape 8)
+
+Le déploiement sur la machine hôte est une opération répétée, potentiellement ciblant plusieurs environnements (staging, production). Rundeck est idéal ici : on définit un Job Rundeck qui exécute `docker pull` puis `docker run` sur le nœud cible. Jenkins peut déclencher ce Job via l'API REST de Rundeck (`POST /api/xx/job/<id>/run`) à la fin du pipeline. Cela offre une séparation claire entre l'intégration continue (Jenkins) et le déploiement opérationnel (Rundeck), avec un historique de déploiements, des approbations manuelles paramétrables et des notifications en cas d'échec.
+
+### Étape associée n°2 : Rollback en cas d'échec
+
+Si le déploiement échoue ou si une anomalie est détectée après mise en production, Rundeck peut déclencher automatiquement (via webhook ou cron) un Job de rollback : `docker stop`, `docker rm`, puis `docker run` avec le tag de l'image précédente récupéré depuis le registre. Rundeck fournit les options `successOnEmptyNodeFilter`, les timeouts et les notifications Slack/email intégrés qui font défaut à Jenkins pour ce type d'opération opérationnelle.
