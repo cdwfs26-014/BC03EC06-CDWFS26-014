@@ -62,6 +62,17 @@ services:
     networks:
       - jenkins-net
 
+  ssh-agent:
+    image: jenkins/ssh-agent:latest
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFB6M7LqNvlzcmU25zdsHN83cxwZvp8BVnPyrGOxvcJA jenkins-ssh-agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - jenkins
+    networks:
+      - jenkins-net
+
 networks:
   jenkins-net:
 
