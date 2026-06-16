@@ -1,4 +1,5 @@
 services:
+
   jenkins:
     build:
       context: ./jenkins
@@ -8,6 +9,39 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
+    networks:
+      - jenkins-net
+
+  agent1:
+    image: jenkins/agent:latest
+    environment:
+      - JENKINS_URL=http://jenkins:8080
+      - JENKINS_AGENT_NAME=agent1
+      - JENKINS_SECRET=${AGENT1_SECRET}
+      - JENKINS_AGENT_WORKDIR=/home/jenkins/agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - jenkins
+    networks:
+      - jenkins-net
+
+  agent2:
+    image: jenkins/agent:latest
+    environment:
+      - JENKINS_URL=http://jenkins:8080
+      - JENKINS_AGENT_NAME=agent2
+      - JENKINS_SECRET=${AGENT2_SECRET}
+      - JENKINS_AGENT_WORKDIR=/home/jenkins/agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - jenkins
+    networks:
+      - jenkins-net
+
+networks:
+  jenkins-net:
 
 volumes:
   jenkins_home:
